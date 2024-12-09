@@ -1,3 +1,24 @@
+// The scanning procedure has runtime complexity O(k^2) where k is the length of
+// the sequence. Proof: For every element in the sequence we visit the remaining
+// elements in the sequence. Then the total number of visits is equal to the k'th
+// triangle number which grows with the square of k.
+//
+// If there are m sequences, each with k elements, then obviously the runtime complexity
+// of scanning all sequences is O(m * k^2). 
+// 
+// Of course our scanning procedure is predicated on the existence of the "rules" hash table.
+// Constructing the rules hash table has runtime complexity O(n) where n is the total number
+// of rules.
+//
+// The summary worst-case runtime complexity is then O(max(m * k^2), n).
+//
+// The space complexity ignoring the input text is entirely determined by the "rules" table
+// which has a length bounded by the total number of identifiers p.
+//
+// In the worst-case the number of rules is equal to p^2 / 2 - p, that is, each identifier
+// is explicitly related to all the identifiers in the universal set by a rule.
+// Then the space complexity is O(p^2).
+
 use std::collections::{HashMap, HashSet};
 
 fn main() {
