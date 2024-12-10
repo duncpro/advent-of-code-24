@@ -1,3 +1,57 @@
+#![feature(portable_simd)]
+
+use std::simd::prelude::*;
+
+const ROW_END_CH: u8 = '\n' as u8;
+const EMPTY_CELL: u8 = '.' as u8;
+
 fn main() {
-    println!("Hello, world!");
+    let input = std::fs::read("input.txt").unwrap();
+
+    let width = input.iter().position(|c| *c == ROW_END_CH).unwrap();
+    let height = input.iter().filter(|c| **c == ROW_END_CH).count();
+
+    let idx_of = |p: usizex2| { 
+        let [x, y] = p.into();
+        y * (width + 1) + x
+    };
+
+    let mut antennas = Vec::<usizex2>::new();
+
+    for x in 0..width {
+        for y in 0..height {
+            let p: usizex2 = [x, y].into();
+            if input[idx_of(p)] != EMPTY_CELL {
+                antennas.push(p);
+            }
+        }
+    }
+
+    let mut antinodes = 
+        std::collections::HashSet::<usizex2>::new();
+
+    for i in 0..antennas.len() {
+        for j in 0..antennas.len() {
+            if j <= i { continue; }
+            
+            let (p0, p1) = (antennas[i], antennas[j]);
+            let c0 = input[idx_of(p0)];
+            let c1 = input[idx_of(p1)];
+            if c0 != c1 { continue; }
+
+            let ps0: isizex2 = p0.cast();
+            let ps1: isizex2 = p1.cast();
+            let v = ps0 - ps1; // vector from ps1 to ps0
+            for ps in [ps0 + v, ps1 - v] {
+                let [x, y] = ps.into();
+                let x_inbounds = (0..(width as isize)).contains(&x);
+                let y_inbounds = (0..(height as isize)).contains(&y);
+                if !(x_inbounds && y_inbounds) { continue; }
+                antinodes.insert(ps.cast());
+            }
+        }
+    }
+    
+    println!("{}", antinodes.len());
 }
+
